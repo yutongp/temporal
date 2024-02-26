@@ -34,8 +34,8 @@ services:
     envVars:
       - key: PORT
         value: 9200
-      - key: ES_JAVA_OPTS
-        value: "-Xms100m -Xmx1g"
+#      - key: ES_JAVA_OPTS
+#        value: "-Xms100m -Xmx1g"
       - key: xpack.security.enabled
         value: true
       - key: ELASTIC_PASSWORD
