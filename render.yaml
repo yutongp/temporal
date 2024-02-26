@@ -23,7 +23,7 @@ services:
   - type: pserv
     name: temporal-elasticsearch
     autoDeploy: false
-    plan: Starter
+    plan: Standard
     region: oregon
     env: docker
     dockerfilePath: ./temporal-cluster/elasticsearch/Dockerfile
