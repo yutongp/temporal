@@ -263,10 +263,7 @@ services:
       - key: TEMPORAL_UI_PORT
         value: 8088
       - key: TEMPORAL_ADDRESS
-        fromService:
-          name: temporal-frontend
-          type: pserv
-          property: hostport
+        value: temporal-frontend-nfkv:7233
 # - type: pserv
 #   name: temporal-web
 #   autoDeploy: false
