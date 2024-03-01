@@ -18,10 +18,6 @@ envVarGroups:
         value: elastic
       - key: DB
         value: postgresql
-      - key: BIND_ON_IP
-        value: 0.0.0.0
-      - key: TEMPORAL_BROADCAST_ADDRESS
-        value: 0.0.0.0
 
 services:
   - type: pserv
@@ -70,6 +66,13 @@ services:
       - fromGroup: temporal-shared
       - key: SERVICES
         value: frontend
+      - key: BIND_ON_IP
+        value: 0.0.0.0
+      - key: TEMPORAL_BROADCAST_ADDRESS
+        fromService:
+          name: temporal-frontend
+          type: pserv
+          property: host
       - key: SKIP_POSTGRES_DB_CREATION
         value: true
       - key: SKIP_VISIBILITY_DB_SETUP
