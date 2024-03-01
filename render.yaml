@@ -69,10 +69,7 @@ services:
       - key: BIND_ON_IP
         value: 0.0.0.0
       - key: TEMPORAL_BROADCAST_ADDRESS
-        fromService:
-          name: temporal-frontend
-          type: pserv
-          property: host
+        value: 0.0.0.0
       - key: SKIP_POSTGRES_DB_CREATION
         value: true
       - key: SKIP_VISIBILITY_DB_SETUP
