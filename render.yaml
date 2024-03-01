@@ -18,6 +18,10 @@ envVarGroups:
         value: elastic
       - key: DB
         value: postgresql
+      - key: BIND_ON_IP
+        value: 0.0.0.0
+      - key: TEMPORAL_BROADCAST_ADDRESS
+        value: 0.0.0.0
 
 services:
   - type: pserv
@@ -34,8 +38,8 @@ services:
     envVars:
       - key: PORT
         value: 9200
-#      - key: ES_JAVA_OPTS
-#        value: "-Xms100m -Xmx1g"
+      #      - key: ES_JAVA_OPTS
+      #        value: "-Xms100m -Xmx1g"
       - key: xpack.security.enabled
         value: true
       - key: ELASTIC_PASSWORD
@@ -57,11 +61,11 @@ services:
     region: oregon
     env: docker
     dockerfilePath: ./temporal-cluster/server/auto-setup/Dockerfile
-#    scaling:
-#      minInstances: 1
-#      maxInstances: 3
-#      targetMemoryPercent: 80
-#      targetCPUPercent: 80
+    #    scaling:
+    #      minInstances: 1
+    #      maxInstances: 3
+    #      targetMemoryPercent: 80
+    #      targetCPUPercent: 80
     envVars:
       - fromGroup: temporal-shared
       - key: SERVICES
@@ -107,11 +111,11 @@ services:
     region: oregon
     env: docker
     dockerfilePath: ./temporal-cluster/server/Dockerfile
-#    scaling:
-#      minInstances: 1
-#      maxInstances: 3
-#      targetMemoryPercent: 80
-#      targetCPUPercent: 80
+    #    scaling:
+    #      minInstances: 1
+    #      maxInstances: 3
+    #      targetMemoryPercent: 80
+    #      targetCPUPercent: 80
     envVars:
       - fromGroup: temporal-shared
       - key: SERVICES
@@ -154,11 +158,11 @@ services:
     region: oregon
     env: docker
     dockerfilePath: ./temporal-cluster/server/Dockerfile
-#    scaling:
-#      minInstances: 1
-#      maxInstances: 3
-#      targetMemoryPercent: 80
-#      targetCPUPercent: 80
+    #    scaling:
+    #      minInstances: 1
+    #      maxInstances: 3
+    #      targetMemoryPercent: 80
+    #      targetCPUPercent: 80
     envVars:
       - fromGroup: temporal-shared
       - key: SERVICES
@@ -201,11 +205,11 @@ services:
     region: oregon
     env: docker
     dockerfilePath: ./temporal-cluster/server/Dockerfile
-#    scaling:
-#      minInstances: 1
-#      maxInstances: 3
-#      targetMemoryPercent: 80
-#      targetCPUPercent: 80
+    #    scaling:
+    #      minInstances: 1
+    #      maxInstances: 3
+    #      targetMemoryPercent: 80
+    #      targetCPUPercent: 80
     envVars:
       - fromGroup: temporal-shared
       # The worker service needs to wait for the history service to be up first,
@@ -257,12 +261,12 @@ services:
     dockerfilePath: ./temporal-cluster/ui/Dockerfile
     envVars:
       - key: TEMPORAL_UI_PORT
-        value: 8080
-      - key: TEMPORAL_ADDRESS
+        value: 8088
+      - key: TEMPORAL_GRPC_HOST
         fromService:
           name: temporal-frontend
           type: pserv
-          property: hostport
+          property: host
 # - type: pserv
 #   name: temporal-web
 #   autoDeploy: false
