@@ -262,11 +262,11 @@ services:
     envVars:
       - key: TEMPORAL_UI_PORT
         value: 8088
-      - key: TEMPORAL_GRPC_HOST
+      - key: TEMPORAL_ADDRESS
         fromService:
           name: temporal-frontend
           type: pserv
-          property: host
+          property: hostport
 # - type: pserv
 #   name: temporal-web
 #   autoDeploy: false
