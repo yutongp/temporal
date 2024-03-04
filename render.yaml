@@ -117,7 +117,7 @@ services:
     #      targetMemoryPercent: 80
     #      targetCPUPercent: 80
     envVars:
-      - fromGroup: temporal-shared
+      - fromGroup: eu-temporal-shared
       - key: SERVICES
         value: history
       - key: TEMPORAL_FRONTEND_HOST
@@ -164,7 +164,7 @@ services:
     #      targetMemoryPercent: 80
     #      targetCPUPercent: 80
     envVars:
-      - fromGroup: temporal-shared
+      - fromGroup: eu-temporal-shared
       - key: SERVICES
         value: matching
       - key: TEMPORAL_FRONTEND_HOST
@@ -211,7 +211,7 @@ services:
     #      targetMemoryPercent: 80
     #      targetCPUPercent: 80
     envVars:
-      - fromGroup: temporal-shared
+      - fromGroup: eu-temporal-shared
       # The worker service needs to wait for the history service to be up first,
       # otherwise it will fail with "error starting scanner".
       - key: DEPENDS_ON_HISTORY
