@@ -263,9 +263,10 @@ services:
       - key: TEMPORAL_UI_PORT
         value: 8088
       - key: TEMPORAL_ADDRESS
-        name: eu-temporal-frontend
-        type: pserv
-        property: hostport
+        fromService:
+          name: eu-temporal-frontend
+          type: pserv
+          property: hostport
 # - type: pserv
 #   name: eu-temporal-web
 #   autoDeploy: false
