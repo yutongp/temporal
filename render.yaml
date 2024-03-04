@@ -1,12 +1,12 @@
 databases:
-  - name: temporal-db
+  - name: eu-temporal-db
     databaseName: temporal
     user: temporal
     plan: Starter
-    region: oregon
+    region: frankfurt
 
 envVarGroups:
-  - name: temporal-shared
+  - name: eu-temporal-shared
     envVars:
       - key: DYNAMIC_CONFIG_FILE_PATH
         value: /etc/temporal/dynamicconfig_es.yaml
@@ -21,10 +21,10 @@ envVarGroups:
 
 services:
   - type: pserv
-    name: temporal-elasticsearch
+    name: eu-temporal-elasticsearch
     autoDeploy: false
     plan: Standard
-    region: oregon
+    region: frankfurt
     env: docker
     dockerfilePath: ./temporal-cluster/elasticsearch/Dockerfile
     disk:
@@ -51,10 +51,10 @@ services:
       - key: discovery.type
         value: single-node
   - type: pserv
-    name: temporal-frontend
+    name: eu-temporal-frontend
     autoDeploy: false
     plan: Starter
-    region: oregon
+    region: frankfurt
     env: docker
     dockerfilePath: ./temporal-cluster/server/auto-setup/Dockerfile
     #    scaling:
@@ -63,7 +63,7 @@ services:
     #      targetMemoryPercent: 80
     #      targetCPUPercent: 80
     envVars:
-      - fromGroup: temporal-shared
+      - fromGroup: eu-temporal-shared
       - key: SERVICES
         value: frontend
       - key: BIND_ON_IP
@@ -76,39 +76,39 @@ services:
         value: true
       - key: ES_SEEDS
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           property: host
       - key: ES_PWD
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           envVarKey: ELASTIC_PASSWORD
       - key: DBNAME
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: database
       - key: DB_PORT
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: port
       - key: POSTGRES_USER
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: user
       - key: POSTGRES_PWD
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: password
       - key: POSTGRES_SEEDS
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: host
   - type: pserv
-    name: temporal-history
+    name: eu-temporal-history
     autoDeploy: false
     plan: Starter
-    region: oregon
+    region: frankfurt
     env: docker
     dockerfilePath: ./temporal-cluster/server/Dockerfile
     #    scaling:
@@ -122,40 +122,40 @@ services:
         value: history
       - key: TEMPORAL_FRONTEND_HOST
         fromService:
-          name: temporal-frontend
+          name: eu-temporal-frontend
           type: pserv
           property: host
       - key: ES_SEEDS
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           property: host
       - key: ES_PWD
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           envVarKey: ELASTIC_PASSWORD
       - key: DBNAME
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: database
       - key: POSTGRES_USER
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: user
       - key: POSTGRES_PWD
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: password
       - key: POSTGRES_SEEDS
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: host
   - type: pserv
-    name: temporal-matching
+    name: eu-temporal-matching
     autoDeploy: false
     plan: Starter
-    region: oregon
+    region: frankfurt
     env: docker
     dockerfilePath: ./temporal-cluster/server/Dockerfile
     #    scaling:
@@ -169,40 +169,40 @@ services:
         value: matching
       - key: TEMPORAL_FRONTEND_HOST
         fromService:
-          name: temporal-frontend
+          name: eu-temporal-frontend
           type: pserv
           property: host
       - key: ES_SEEDS
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           property: host
       - key: ES_PWD
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           envVarKey: ELASTIC_PASSWORD
       - key: DBNAME
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: database
       - key: POSTGRES_USER
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: user
       - key: POSTGRES_PWD
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: password
       - key: POSTGRES_SEEDS
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: host
   - type: pserv
     autoDeploy: false
-    name: temporal-worker
+    name: eu-temporal-worker
     plan: Starter
-    region: oregon
+    region: frankfurt
     env: docker
     dockerfilePath: ./temporal-cluster/server/Dockerfile
     #    scaling:
@@ -216,59 +216,61 @@ services:
       # otherwise it will fail with "error starting scanner".
       - key: DEPENDS_ON_HISTORY
         fromService:
-          name: temporal-history
+          name: eu-temporal-history
           type: pserv
           property: host
       - key: SERVICES
         value: worker
       - key: TEMPORAL_FRONTEND_HOST
         fromService:
-          name: temporal-frontend
+          name: eu-temporal-frontend
           type: pserv
           property: host
       - key: ES_SEEDS
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           property: host
       - key: ES_PWD
         fromService:
-          name: temporal-elasticsearch
+          name: eu-temporal-elasticsearch
           type: pserv
           envVarKey: ELASTIC_PASSWORD
       - key: DBNAME
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: database
       - key: POSTGRES_USER
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: user
       - key: POSTGRES_PWD
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: password
       - key: POSTGRES_SEEDS
         fromDatabase:
-          name: temporal-db
+          name: eu-temporal-db
           property: host
   - type: pserv
-    name: temporal-ui
+    name: eu-temporal-ui
     autoDeploy: false
     plan: Starter
-    region: oregon
+    region: frankfurt
     env: docker
     dockerfilePath: ./temporal-cluster/ui/Dockerfile
     envVars:
       - key: TEMPORAL_UI_PORT
         value: 8088
       - key: TEMPORAL_ADDRESS
-        value: temporal-frontend-nfkv:7233
+        name: eu-temporal-frontend
+        type: pserv
+        property: hostport
 # - type: pserv
-#   name: temporal-web
+#   name: eu-temporal-web
 #   autoDeploy: false
 #   plan: Starter
-#   region: oregon
+#   region: frankfurt
 #   env: docker
 #   dockerfilePath: ./temporal-cluster/web/Dockerfile
 #   envVars:
@@ -278,7 +280,7 @@ services:
 #     value: true
 #   - key: TEMPORAL_GRPC_HOST
 #     fromService:
-#       name: temporal-frontend
+#       name: eu-temporal-frontend
 #       type: pserv
 #       property: host
 # For secure external access to the Temporal Workflow Service via REST
@@ -288,7 +290,7 @@ services:
 #   repo: https://github.com/render-examples/temporal-rest-proxy
 #   autoDeploy: false
 #   plan: Starter
-#   region: oregon
+#   region: frankfurt
 #   env: go
 #   buildCommand: go build rest-proxy/main.go
 #   startCommand: ./main
