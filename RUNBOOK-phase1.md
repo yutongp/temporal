@@ -98,7 +98,14 @@ the per-step commits are the deploy units.)
 3. **temporal-history**, Deploy latest commit; wait for live.
 4. **temporal-matching**, same.
 5. **temporal-worker**, same.
-6. **Check** from the new temporal-frontend Shell:
+6. **Restart our app's Temporal worker service** (the `srv-cm1r1sun7f5s73eo89ag`
+   pods) once temporal-worker is live. After the Phase 0 deploys on
+   2026-10-21, one pod's worker process (vfb5r) stayed connected but
+   broken: Temporal handed it 4 system-job tasks at 23:51 that it never ran,
+   and they failed at their timeouts until the process restarted at about
+   23:52. The rehearsal's worker never hit this, so treat it as Render-only.
+   Restarting right away closes the window.
+7. **Check** from the new temporal-frontend Shell:
    ```bash
    temporal operator cluster system --address localhost:7233          # ServerVersion = this step
    curl -s -u "$ES_USER:$ES_PWD" "http://$ES_SEEDS:9200/temporal_visibility_v1_dev/_mapping" | grep -o '"<new field>"'
@@ -109,7 +116,7 @@ the per-step commits are the deploy units.)
    and the same for `staging-system-jobs-tick-schedule`. The last 10 action
    times should be one per minute up to now, with no gap around the deploy. Also check
    `select curr_version from schema_version;` matches the table.
-7. **Logs.** These ERROR lines are expected, all within about a second of the
+8. **Logs.** These ERROR lines are expected, all within about a second of the
    matching deploy (plus one `sticky worker unavailable` at the next
    schedule tick). Anything else is new:
    - matching: `GetTaskQueue operation failed ... Error: context canceled`,
@@ -130,7 +137,7 @@ the per-step commits are the deploy units.)
    hit it: a schedule whose shard pauses for more than a minute skips that
    run, because the SDK's default catchup window is 1 minute.
 
-After step 7, fast-forward `main` to the branch tip (this runbook; nothing to
+After upgrade step 7, fast-forward `main` to the branch tip (this runbook; nothing to
 deploy).
 
 **region-eu** follows the same steps against the EU services, moving
