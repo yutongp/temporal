@@ -19,3 +19,8 @@ history.defaultWorkflowRetryPolicy:
     MaximumIntervalCoefficient: 100.0
     BackoffCoefficient: 2.0
     MaximumAttempts: 0
+# 1.25+ caches workflows per host: up to 128000 entries, about 35 KiB each.
+# 2048 is the pre-1.25 total (512 per shard x 4 shards) and fits in 512 MB.
+history.hostLevelCacheMaxSize:
+- value: 2048
+  constraints: {}

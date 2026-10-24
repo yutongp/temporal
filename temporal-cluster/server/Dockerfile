@@ -1,4 +1,4 @@
-FROM temporalio/server:1.24.3
+FROM temporalio/server:1.25.2
 
 COPY temporal-cluster/server/dynamicconfig.yaml /etc/temporal/dynamicconfig.yaml
 COPY temporal-cluster/server/dynamicconfig_es.yaml /etc/temporal/dynamicconfig_es.yaml
