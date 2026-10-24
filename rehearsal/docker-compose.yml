@@ -1,0 +1,152 @@
+# Local rehearsal of the Render Blueprint in ../render.yaml.
+# Same Dockerfiles, same env vars, Render plan CPU/memory as limits.
+# Host names stand in for Render's internal hosts (temporal-frontend etc.).
+#
+#   docker compose -f rehearsal/docker-compose.yml up -d --build
+#
+# The frontend has no host port so that a second frontend can run beside the
+# first during a deploy, as Render does. Reach the cluster from the harness
+# container (rehearsal/harness) or the UI at http://localhost:18088.
+name: temporal-rehearsal
+
+x-temporal-shared: &temporal-shared
+  # envVarGroups.temporal-shared
+  DYNAMIC_CONFIG_FILE_PATH: /etc/temporal/dynamicconfig_es.yaml
+  ENABLE_ES: "true"
+  ES_VERSION: v7
+  ES_USER: elastic
+  DB: postgresql
+  # fromService / fromDatabase values
+  ES_SEEDS: temporal-elasticsearch
+  ES_PWD: rehearsal-es-pwd
+  DBNAME: temporal
+  POSTGRES_USER: temporal
+  POSTGRES_PWD: rehearsal-pg-pwd
+  POSTGRES_SEEDS: temporal-db
+
+# Render Starter plan: 0.5 CPU, 512 MB.
+x-starter: &starter
+  cpus: 0.5
+  mem_limit: 512m
+  restart: unless-stopped
+
+services:
+  temporal-db:
+    # Render managed Postgres, plan 0.5c-1g.
+    image: postgres:16
+    environment:
+      POSTGRES_USER: temporal
+      POSTGRES_PASSWORD: rehearsal-pg-pwd
+      POSTGRES_DB: temporal
+    ports: ["15432:5432"]
+    cpus: 0.5
+    mem_limit: 1g
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "temporal"]
+      interval: 2s
+      retries: 30
+
+  temporal-elasticsearch:
+    build:
+      context: ..
+      dockerfile: temporal-cluster/elasticsearch/Dockerfile
+    environment:
+      PORT: "9200"
+      xpack.security.enabled: "true"
+      ELASTIC_PASSWORD: rehearsal-es-pwd
+      cluster.routing.allocation.disk.threshold_enabled: "true"
+      cluster.routing.allocation.disk.watermark.low: 512mb
+      cluster.routing.allocation.disk.watermark.high: 256mb
+      cluster.routing.allocation.disk.watermark.flood_stage: 128mb
+      discovery.type: single-node
+      # Local only: Docker Desktop has about 4 GB.
+      ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+    ports: ["19200:9200"]
+    cpus: 1
+    mem_limit: 1536m
+    volumes: [esdata:/usr/share/elasticsearch/data]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf -u elastic:rehearsal-es-pwd localhost:9200/_cluster/health"]
+      interval: 3s
+      retries: 60
+
+  temporal-frontend:
+    <<: *starter
+    build:
+      context: ..
+      dockerfile: temporal-cluster/server/auto-setup/Dockerfile
+    environment:
+      <<: *temporal-shared
+      SERVICES: frontend
+      BIND_ON_IP: 0.0.0.0
+      TEMPORAL_BROADCAST_ADDRESS: 0.0.0.0
+      SKIP_POSTGRES_DB_CREATION: "true"
+      SKIP_VISIBILITY_DB_SETUP: "true"
+      DB_PORT: "5432"
+      # Set by Render on every service.
+      RENDER_SERVICE_NAME: temporal-frontend
+    depends_on:
+      temporal-db: {condition: service_healthy}
+      temporal-elasticsearch: {condition: service_healthy}
+
+  temporal-history:
+    <<: *starter
+    build:
+      context: ..
+      dockerfile: temporal-cluster/server/Dockerfile
+    environment:
+      <<: *temporal-shared
+      SERVICES: history
+      TEMPORAL_FRONTEND_HOST: temporal-frontend
+      RENDER_SERVICE_NAME: temporal-history
+    depends_on: [temporal-frontend]
+
+  temporal-matching:
+    <<: *starter
+    build:
+      context: ..
+      dockerfile: temporal-cluster/server/Dockerfile
+    environment:
+      <<: *temporal-shared
+      SERVICES: matching
+      TEMPORAL_FRONTEND_HOST: temporal-frontend
+      RENDER_SERVICE_NAME: temporal-matching
+    depends_on: [temporal-frontend]
+
+  temporal-worker:
+    <<: *starter
+    build:
+      context: ..
+      dockerfile: temporal-cluster/server/Dockerfile
+    environment:
+      <<: *temporal-shared
+      DEPENDS_ON_HISTORY: temporal-history
+      SERVICES: worker
+      TEMPORAL_FRONTEND_HOST: temporal-frontend
+      RENDER_SERVICE_NAME: temporal-worker
+    depends_on: [temporal-history]
+
+  temporal-ui:
+    <<: *starter
+    build:
+      context: ..
+      dockerfile: temporal-cluster/ui/Dockerfile
+    environment:
+      TEMPORAL_UI_PORT: "8088"
+      TEMPORAL_ADDRESS: temporal-frontend:7233
+    ports: ["18088:8088"]
+    depends_on: [temporal-frontend]
+
+  # Not part of render.yaml: the SDK harness (temporalio==1.5.0, as the app).
+  harness:
+    profiles: [harness]
+    build: ./harness
+    environment:
+      TEMPORAL_ADDRESS: temporal-frontend:7233
+    volumes: ["./harness:/harness", "./out:/out"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  esdata:
