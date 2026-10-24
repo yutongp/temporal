@@ -1,4 +1,4 @@
-FROM temporalio/auto-setup:1.23.1
+FROM temporalio/auto-setup:1.24.3
 
 COPY temporal-cluster/server/dynamicconfig.yaml /etc/temporal/dynamicconfig.yaml
 COPY temporal-cluster/server/dynamicconfig_es.yaml /etc/temporal/dynamicconfig_es.yaml
